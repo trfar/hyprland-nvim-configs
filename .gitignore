@@ -1,0 +1,8 @@
+*.swp
+*.swo
+.DS_Store
+tags
+test.sh
+.luarc.json
+spell/
+nvim-pack-lock.json
