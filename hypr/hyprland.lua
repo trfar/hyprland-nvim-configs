@@ -20,6 +20,9 @@ local lockscreen  = "hyprlock"
 local statusbar   = "ashell"
 local browser     = "zen-browser"
 local obsidian    = "obsidian"
+local idle_daemon = "hypridle"
+local wallpaper_daemon = "swaybg"
+
 
 
 
@@ -27,19 +30,10 @@ local obsidian    = "obsidian"
 -------------------
 ---- AUTOSTART ----
 -------------------
--- See https://wiki.hypr.land/Configuring/Basics/Autostart/
--- Autostart necessary processes (like notifications daemons, status bars, etc.)
--- Or execute your favorite apps at launch like this:
---
--- hl.on("hyprland.start", function () 
---   hl.exec_cmd(terminal)
---   hl.exec_cmd("nm-applet")
---   hl.exec_cmd("waybar & hyprpaper & firefox")
--- end)
-
 hl.on("hyprland.start", function () 
-  hl.exec_cmd("hyprpaper")
-  hl.exec_cmd("hypridle")
+  hl.exec_cmd(wallpaper_daemon .. " -o DP-1 -i /home/trfar/Pictures/Wallpapers/Active.png")
+  hl.exec_cmd(wallpaper_daemon .. " -o DP-2 -i /home/trfar/Pictures/Wallpapers/Active-Cropped.png ")
+  hl.exec_cmd(idle_daemon)
   hl.exec_cmd(lockscreen)
   hl.exec_cmd(statusbar)
 end)
@@ -51,7 +45,6 @@ end)
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
 -------------------------------
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
