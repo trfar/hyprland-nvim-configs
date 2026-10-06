@@ -73,13 +73,14 @@ end
 -- basic keymaps, basic autocmds
 -- ============================================================
 do
-  -- [[ Basic Keymaps ]]
-  --  See `:help vim.keymap.set()`
+  -- EXITING INTERACT MODE KEYBINDS:
   vim.keymap.set('i', 'jk', '<Esc>', { desc = 'Exit insert mode with jk' })
   vim.keymap.set('i', 'kj', '<Esc>', { desc = 'Exit insert mode with kj' })
-  -- Clear highlights on search when pressing <Esc> in normal mode
-  --  See `:help hlsearch`
+
+  -- CLEAR HIGHLIGHTS ON SEARCH:
   vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+  vim.keymap.set('n', 'kj', '<cmd>nohlsearch<CR>')
+  vim.keymap.set('n', 'jk', '<cmd>nohlsearch<CR>')
 
   -- Diagnostic Config & Keymaps
   --  See `:help vim.diagnostic.Opts`
