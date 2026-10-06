@@ -1,5 +1,6 @@
--- https://wiki.hypr.land/Configuring/Start/
--- You can (and should!!) split this configuration into multiple files
+-- Getting rid of hl varible undefined flag
+---@diagnostic disable: undefined-global
+
 ------------------
 ---- MONITORS ----
 ------------------
@@ -30,7 +31,7 @@ local wallpaper_daemon = "swaybg"
 -------------------
 ---- AUTOSTART ----
 -------------------
-hl.on("hyprland.start", function () 
+hl.on("hyprland.start", function() 
   hl.exec_cmd(wallpaper_daemon .. " -o DP-1 -i /home/trfar/Pictures/Wallpapers/Active.png")
   hl.exec_cmd(wallpaper_daemon .. " -o DP-2 -i /home/trfar/Pictures/Wallpapers/Active-Cropped.png ")
   hl.exec_cmd(idle_daemon)
@@ -76,22 +77,19 @@ hl.env("HYPRCURSOR_SIZE", "24")
 -----------------------
 ---- LOOK AND FEEL ----
 -----------------------
--- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     general = {
         gaps_in  = 3,
         gaps_out = 0,
 
-        border_size = 1,
+        border_size = 2,
 
         col = {
             active_border   = { colors = {"rgba(ff3333ff)", "rgba(ff9900ff)"}, angle = 45 },
             inactive_border = "rgba(595959aa)",
         },
-        -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
         resize_on_border = false,
-        -- Please see https://wiki.hypr.land/Configuring/Advanced-and-Cool/Tearing/ before you turn this on
-        allow_tearing = false,
+        allow_tearing = true,
         layout = "dwindle",
     },
 
@@ -101,7 +99,7 @@ hl.config({
 
         -- Change transparency of focused and unfocused windows
         active_opacity   = 1.0,
-        inactive_opacity = 1.0,
+        inactive_opacity = .92,
 
         shadow = {
             enabled      = true,
@@ -169,21 +167,21 @@ hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "
 --     rounding    = 0,
 -- })
 
--- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
+-- DWINDLE CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
     dwindle = {
         preserve_split = true, -- You probably want this
     },
 })
 
--- See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
+-- MASTER CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
 hl.config({
     master = {
         new_status = "master",
     },
 })
 
--- See https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/ for more
+-- SCROLLING (NIRI) CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/ for more
 hl.config({
     scrolling = {
         fullscreen_on_one_column = true,
