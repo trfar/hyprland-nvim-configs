@@ -79,8 +79,6 @@ do
 
   -- CLEAR HIGHLIGHTS ON SEARCH:
   vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-  vim.keymap.set('n', 'kj', '<cmd>nohlsearch<CR>')
-  vim.keymap.set('n', 'jk', '<cmd>nohlsearch<CR>')
 
   -- Diagnostic Config & Keymaps
   --  See `:help vim.diagnostic.Opts`
@@ -643,25 +641,10 @@ do
   --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
   --  See `:help lsp-config` for information about keys and how to configure
   ---@type table<string, vim.lsp.Config>
-  local servers = {
-    -- clangd = {},
-    -- gopls = {},
-    -- pyright = {},
-    -- tsc = {},
-    --
-    -- Some languages (like rust) have entire language plugins that can be useful:
-    --    https://github.com/mrcjkb/rustaceanvim
-    --
-    -- But for many setups, the LSP (`rust_analyzer`) will work just fine
-    -- rust_analyzer = {},
-
-    stylua = {}, -- Used to format Lua code
-
+ local servers = {
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
       on_init = function(client)
-        client.server_capabilities.documentFormattingProvider = false -- Disable formatting (formatting is done by stylua)
-
         if client.workspace_folders then
           local path = client.workspace_folders[1].name
           if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
@@ -675,21 +658,21 @@ do
           },
           workspace = {
             checkThirdParty = false,
-            -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-            --  See https://github.com/neovim/nvim-lspconfig/issues/3189
-            library = vim.api.nvim_get_runtime_file('', true),
+            -- Load only standard Neovim runtime to prevent background indexing freeze
+            library = {
+              vim.env.VIMRUNTIME,
+            },
           },
         })
       end,
       ---@type lspconfig.settings.lua_ls
       settings = {
         Lua = {
-          format = { enable = false }, -- Disable formatting (formatting is done by stylua)
+          format = { enable = false },
         },
       },
     },
   }
-
   vim.pack.add {
     gh 'neovim/nvim-lspconfig',
     gh 'mason-org/mason.nvim',
