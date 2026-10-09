@@ -1,70 +1,42 @@
---[[
 -- ============================================================
 -- SECTION 1: OPTIONS
--- Core Neovim settings, leaders, options
+-- Core Neovim Settings, Leaders, Options
 -- ============================================================
--- ]]
-
 do
-  -- Enable faster startup by caching compiled Lua modules
+  -- Enable Faster Startup with Lua Caching
   vim.loader.enable()
-  -- See `:help mapleader`
+
+  -- [Space] as Map Leader
   vim.g.mapleader = ' '
   vim.g.maplocalleader = ' '
-
-  -- Set to true if you have a Nerd Font installed and selected in the terminal
+  -- Enable Nerd Fonts (Jet Brains Mono)
   vim.g.have_nerd_font = true
 
-  --  See `:help vim.o`
+  --  Vim Options (o)
   vim.o.number = true -- Make Line Numbers Default
   vim.o.relativenumber = true -- Make Relative Line Numbers True
   vim.o.mouse = 'a' -- Mouse Mode "always"
   vim.o.showmode = false --Show Mode on Terminal Line ; Unneded due to Status Line Indicators
-
-  --  See `:help 'clipboard'`
-  vim.schedule(function() vim.o.clipboard = 'unnamedplus' end) -- Setting Connection from Neovim Clipboard to System Clipboard
-
+  vim.schedule(function() vim.o.clipboard = 'unnamedplus' end) -- Binding Nvim & System Clipboards
   vim.o.breakindent = true --Break Indent
-
   vim.o.undofile = true -- Enable Undo/Redo after closinga and reopening files
-
   -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
   vim.o.ignorecase = true
   vim.o.smartcase = true
-
-  -- Keep signcolumn on by default
-  vim.o.signcolumn = 'yes'
-
-  -- Decrease update time
-  vim.o.updatetime = 250
-
-  -- Decrease mapped sequence wait time
-  vim.o.timeoutlen = 300
-
+  vim.o.signcolumn = 'yes' -- Keep Git Diff Indicator Bar
+  vim.o.updatetime = 250 -- Update Time
+  vim.o.timeoutlen = 300 -- Mapped Sequence Timeout
   -- Configure how new splits should be opened
   vim.o.splitright = true
   vim.o.splitbelow = true
-
   -- Configure how Neovim handles Whitespace
   vim.o.list = true
   vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
-  -- Preview substitutions live, as you type!
-  vim.o.inccommand = 'split'
-
-  -- Show which line your cursor is on
-  vim.o.cursorline = true
-
-  -- Minimal number of screen lines to keep above and below the cursor.
-  vim.o.scrolloff = 10
-
-  -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
-  -- instead raise a dialog asking if you wish to save the current file(s)
-  vim.o.confirm = true
+  vim.o.inccommand = 'split' -- Preview Substitutions Live
+  vim.o.cursorline = true -- Cursor Locations
+  vim.o.scrolloff = 18 -- Minimal Number of Lines to Keep Above & Below
+  vim.o.confirm = true -- Dialog Box to Ask to Save Before Commands that Delete the Buffer
 end
-
-
-
 
 
 
@@ -79,8 +51,34 @@ do
 
   -- CLEAR HIGHLIGHTS ON SEARCH:
   vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+  -- BETTER TERMINAL EXITING COMMANDS:
+  vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit Terminal Mode with Esc-Esc' })
+  vim.keymap.set('t', 'jk', '<C-\\><C-n>', { desc = 'Exit Terminal Mode with "jk"' })
+  vim.keymap.set('t', 'kj', '<C-\\><C-n>', { desc = 'Exit Terminal Mode with "kj"' })
 
-  -- Diagnostic Config & Keymaps
+  -- DISABLE MOVEMENT WITH ARROW KEYS:
+  vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+  vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+  vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+  vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+
+  -- BETTER SPLIT NAVIGATION SHORTCUTS:
+  vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+  vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+  vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+  vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+  -- [[ BASIC AUTOCOMMANDS ]]
+  --  See `:help lua-guide-autocommands`
+  -- Highlight when yanking (copying) text
+  vim.api.nvim_create_autocmd('TextYankPost', {
+    desc = 'Highlight when yanking (copying) text',
+    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+    callback = function() vim.hl.on_yank() end,
+  })
+
+  -- [[ DIAGNOSTIC CONFIG & KEYBINDS ]]
+  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
   --  See `:help vim.diagnostic.Opts`
   vim.diagnostic.config {
     update_in_insert = false,
@@ -103,35 +101,7 @@ do
       end,
     },
   }
-
-  vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
-  -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
-  vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
-  vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
-  vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-  vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-  vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
-  -- Keybinds to make split navigation easier.
-  vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-  vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-  vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-  vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
-  -- [[ Basic Autocommands ]]
-  --  See `:help lua-guide-autocommands`
-  -- Highlight when yanking (copying) text
-  vim.api.nvim_create_autocmd('TextYankPost', {
-    desc = 'Highlight when yanking (copying) text',
-    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-    callback = function() vim.hl.on_yank() end,
-  })
 end
-
-
-
 
 
 
