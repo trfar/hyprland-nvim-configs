@@ -85,11 +85,9 @@ do
     severity_sort = true,
     float = { border = 'rounded', source = 'if_many' },
     underline = { severity = { min = vim.diagnostic.severity.WARN } },
-
     -- Can switch between these as you prefer
     virtual_text = true, -- Text shows up at the end of the line
     virtual_lines = false, -- Text shows up underneath the line, with virtual lines
-
     -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
     jump = {
       on_jump = function(_, bufnr)
@@ -119,11 +117,6 @@ do
   --
   --  To update plugins, run
   --    :lua vim.pack.update()
-  --
-  --
-  --  Throughout the rest of the config there will be examples
-  --  of how to install and configure plugins using `vim.pack`.
-  --
   local function run_build(name, cmd, cwd)
     local result = vim.system(cmd, { cwd = cwd }):wait()
     if result.code ~= 0 then
@@ -135,7 +128,6 @@ do
     end
   end
 
-  -- See `:help vim.pack-events`
   vim.api.nvim_create_autocmd('PackChanged', {
     callback = function(ev)
       local name = ev.data.spec.name
@@ -177,17 +169,11 @@ local function gh(repo) return 'https://github.com/' .. repo end
 -- ============================================================
 do
   -- [[ Installing and Configuring Plugins ]]
-  --
-  -- To install a plugin simply call `vim.pack.add` with its git url.
-  -- This will download the default branch of the plugin, which will usually be `main` or `master`
-  --
-  -- For most plugins its not enough to install them, you also need to call their `.setup()` to start them.
-  --
+  -- Guess Indent - Auto Adjust Editor Space/Tab Spacings to Match a Files Indent Style: 
   vim.pack.add { gh 'NMAC427/guess-indent.nvim' }
   require('guess-indent').setup {}
 
-  -- See `:help gitsigns` to understand what each configuration key does.
-  -- Adds Git Related Signed to the Gutter
+  -- [[ Gitsigns - Adds Git Icons to Sign Column ]]
   vim.pack.add { gh 'lewis6991/gitsigns.nvim' }
   local gitsigns = require 'gitsigns'
   gitsigns.setup {
@@ -198,10 +184,9 @@ do
       topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
       changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
     },
-
-    -- gitsigns.nvim's recommended keymaps:
+    -- Reccomended Keybinds for gitsigns.nvim
     on_attach = function(bufnr)
-      -- Navigation
+      -- Navigation [v]
       vim.keymap.set('n', ']c', function()
         if vim.wo.diff then
           vim.cmd.normal { ']c', bang = true }
@@ -217,11 +202,10 @@ do
           gitsigns.nav_hunk 'prev'
         end
       end, { desc = 'Jump to previous git [c]hange', buf = bufnr })
-
-      -- Visual mode actions
+      -- Visual mode actions [v]
       vim.keymap.set('v', '<leader>hs', function() gitsigns.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'git [s]tage hunk', buf = bufnr })
       vim.keymap.set('v', '<leader>hr', function() gitsigns.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'git [r]eset hunk', buf = bufnr })
-      -- Normal mode actions
+      -- Normal mode actions [n]
       vim.keymap.set('n', '<leader>hs', gitsigns.stage_hunk, { desc = 'git [s]tage hunk', buf = bufnr })
       vim.keymap.set('n', '<leader>hr', gitsigns.reset_hunk, { desc = 'git [r]eset hunk', buf = bufnr })
       vim.keymap.set('n', '<leader>hS', gitsigns.stage_buffer, { desc = 'git [S]tage buffer', buf = bufnr })
@@ -241,20 +225,20 @@ do
     end,
   }
 
-  -- [[ LazyGit Integration ]]
+  -- [[ LazyGit Integration - Git TUI Integration ]]
   vim.pack.add { gh 'kdheepak/lazygit.nvim' }
   vim.keymap.set('n', '<leader>gg', '<cmd>LazyGit<cr>', { desc = 'Open LazyGit' })
 
-  -- Useful plugin to show you pending keybinds.
+  -- [[ Which Key - Shows Pending Keybinds for Compound Commands]]
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
     delay = 0, -- Delay in ms
     icons = { mappings = vim.g.have_nerd_font },
-    -- Document existing key chains
+    -- Document Existing Key Chains
     spec = {
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
-      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+      { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable Gitsigns Kmaps First
       { 'gr', group = 'LSP Actions', mode = { 'n' } },
     },
   }
@@ -263,63 +247,50 @@ do
   vim.pack.add { gh 'Aejkatappaja/cendre' }
   vim.cmd.colorscheme 'cendre'
 
-  -- Highlight todo, notes, etc in comments
-  vim.pack.add { gh 'folke/todo-comments.nvim' }
-  require('todo-comments').setup { signs = false }
-
-  -- [[ mini.nvim ]]
-  --  A collection of various small independent plugins/modules
+  -- [[ mini.nvim - Lightweight Editor Toolbox ]]
   vim.pack.add { gh 'nvim-mini/mini.nvim' }
-
-  -- If a nerd font is available, load the icons module for pretty icons in various plugins.
+  -- [[ mini.icons - Loads Icons if a Nerf Font is used ]]
   if vim.g.have_nerd_font then
     require('mini.icons').setup()
-    -- Used for backwards compatibility with plugins that require `nvim-web-devicons` (e.g. telescope.nvim)
-    MiniIcons.mock_nvim_web_devicons()
   end
-
+  -- [[ mini.files - File Explorer ]]
+  -- Close mini.files:
   require('mini.files').setup({
     mappings = {
       close = 'q',
     },
   })
-  -- Open mini.files with -
+  -- Open mini.files:
   vim.keymap.set('n', '-', function()
     if not MiniFiles.close() then
       MiniFiles.open()
     end
   end, { desc = 'Open mini.files' })
-  --Add split mappings to mini.files
+  -- Add Split Mappings to mini.files:
   vim.api.nvim_create_autocmd('User', {
     pattern = 'MiniFilesBufferCreate',
     callback = function(args)
       local buf = args.data.buf_id
-
-      -- Ctrl-V: open file in vertical split on the right
+      -- Open File in Vertical Split to the Right:
       vim.keymap.set('n', '<C-v>', function()
         local target = MiniFiles.get_explorer_state().target_window
-
         local new_target = vim.api.nvim_win_call(target, function()
           vim.cmd('belowright vertical split')
           return vim.api.nvim_get_current_win()
         end)
-
         MiniFiles.set_target_window(new_target)
         MiniFiles.go_in()
       end, {
         buffer = buf,
         desc = 'Open in vertical split',
       })
-
-      -- Ctrl-X: open file in horizontal split below
+      -- Open File in Horizontal Split Below:
       vim.keymap.set('n', '<C-x>', function()
         local target = MiniFiles.get_explorer_state().target_window
-
         local new_target = vim.api.nvim_win_call(target, function()
           vim.cmd('belowright horizontal split')
           return vim.api.nvim_get_current_win()
         end)
-
         MiniFiles.set_target_window(new_target)
         MiniFiles.go_in()
       end, {
@@ -328,44 +299,22 @@ do
       })
     end,
   })
-
-  -- Examples:
-  --  - va)  - [V]isually select [A]round [)]paren
-  --  - yiiq - [Y]ank [I]nside [I]+1 [Q]uote
-  --  - ci'  - [C]hange [I]nside [']quote
+  -- [[ mini.ai - Extends Text Objects for Code Parsing]]
   require('mini.ai').setup {
-    -- NOTE: Avoid conflicts with the built-in incremental selection mappings on Neovim>=0.12 (see `:help treesitter-incremental-selection`)
     mappings = {
       around_next = 'aa',
       inside_next = 'ii',
     },
     n_lines = 500,
   }
-
-  -- Add/delete/replace surroundings (brackets, quotes, etc.)
-  --
-  -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-  -- - sd'   - [S]urround [D]elete [']quotes
-  -- - sr)'  - [S]urround [R]eplace [)] [']
+  -- [[ mini.surround - Manage Surrounding Code Characters ]]
   require('mini.surround').setup()
-
-  -- Simple and easy statusline.
-  --  You could remove this setup call if you don't like it,
-  --  and try some other statusline plugin
+  -- [[ mini.statusline - Status Line in Neovim ]]
   local statusline = require 'mini.statusline'
-  -- Set `use_icons` to true if you have a Nerd Font
   statusline.setup { use_icons = vim.g.have_nerd_font }
-
-  -- You can configure sections in the statusline by overriding their
-  -- default behavior. For example, here we set the section for
-  -- cursor location to LINE:COLUMN
   ---@diagnostic disable-next-line: duplicate-set-field
   statusline.section_location = function() return '%2l:%-2v' end
-
 end
-
-
-
 
 
 
@@ -510,69 +459,24 @@ end
 -- ============================================================
 do
   -- [[ LSP Configuration ]]
-  -- Brief aside: **What is LSP?**
-  --
-  -- LSP is an initialism you've probably heard, but might not understand what it is.
-  --
-  -- LSP stands for Language Server Protocol. It's a protocol that helps editors
-  -- and language tooling communicate in a standardized fashion.
-  --
-  -- In general, you have a "server" which is some tool built to understand a particular
-  -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc.). These Language Servers
-  -- (sometimes called LSP servers, but that's kind of like ATM Machine) are standalone
-  -- processes that communicate with some "client" - in this case, Neovim!
-  --
-  -- LSP provides Neovim with features like:
-  --  - Go to definition
-  --  - Find references
-  --  - Autocompletion
-  --  - Symbol Search
-  --  - and more!
-  --
-  -- Thus, Language Servers are external tools that must be installed separately from
-  -- Neovim. This is where `mason` and related plugins come into play.
-  --
-  -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
-  -- and elegantly composed help section, `:help lsp-vs-treesitter`
-
-  -- Useful status updates for LSP.
+  -- [[ fidget.nvim - UI Notifications for LSP Updates & Actions ]]
   vim.pack.add { gh 'j-hui/fidget.nvim' }
   require('fidget').setup {}
-
-  --  This function gets run when an LSP attaches to a particular buffer.
-  --    That is to say, every time a new file is opened that is associated with
-  --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
-  --    function will be executed to configure the current buffer
+  -- LSP gets Attached according to a Buffers Extension
   vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
     callback = function(event)
-      -- NOTE: Remember that Lua is a real programming language, and as such it is possible
-      -- to define small helper and utility functions so you don't have to repeat yourself.
-      --
-      -- In this case, we create a function that lets us more easily define mappings specific
-      -- for LSP related items. It sets the mode, buffer and description for us each time.
       local map = function(keys, func, desc, mode)
         mode = mode or 'n'
         vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
       end
-
-      -- Rename the variable under your cursor.
-      --  Most Language Servers support renaming across files, etc.
+      -- RENAME VARIABLE UNDER CURSOR
       map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
-
-      -- Execute a code action, usually your cursor needs to be on top of an error
-      -- or a suggestion from your LSP for this to activate.
+      -- EXECUTE A CODE ACTION
       map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-
-      -- WARN: This is not Goto Definition, this is Goto Declaration.
-      --  For example, in C this would take you to the header.
+      -- GO TO THE FILE WHERE FUNCTION IS DECLARED 
       map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-
-      -- The following two autocommands are used to highlight references of the
-      -- word under your cursor when your cursor rests there for a little while.
-      --    See `:help CursorHold` for information about when this is executed
-      --
-      -- When you move your cursor, the highlights will be cleared (the second autocommand).
+      -- CURSOR-HOLD 
       local client = vim.lsp.get_client_by_id(event.data.client_id)
       if client and client:supports_method('textDocument/documentHighlight', event.buf) then
         local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
@@ -587,7 +491,7 @@ do
           group = highlight_augroup,
           callback = vim.lsp.buf.clear_references,
         })
-
+      -- Detaching LSP when a Buffer is Cleared
         vim.api.nvim_create_autocmd('LspDetach', {
           group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
           callback = function(event2)
@@ -596,30 +500,23 @@ do
           end,
         })
       end
-
-      -- The following code creates a keymap to toggle inlay hints in your
-      -- code, if the language server you are using supports them
-      --
-      -- This may be unwanted, since they displace some of your code
+      -- TOGGLE INLAY HINTS IF SUPPORTED
       if client and client:supports_method('textDocument/inlayHint', event.buf) then
         map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
       end
     end,
   })
 
-  -- Enable the following language servers
-  --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-  --  See `:help lsp-config` for information about keys and how to configure
+  -- [[ LANGUAGE SERVER SELECTION & CONFIGURATION ]]
   ---@type table<string, vim.lsp.Config>
  local servers = {
-    -- Special Lua Config, as recommended by neovim help docs
+    -- Lua Configuration as Reccomended by Neovim Documentation
     lua_ls = {
       on_init = function(client)
         if client.workspace_folders then
           local path = client.workspace_folders[1].name
           if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
         end
-
         local current_settings = client.config.settings --[[@as lspconfig.settings.lua_ls]]
         client.config.settings.Lua = vim.tbl_deep_extend('force', current_settings.Lua, {
           runtime = {
@@ -643,26 +540,17 @@ do
       },
     },
   }
+  -- ADDING LSP MANAGER PLUGINS [[ MASON ]]
   vim.pack.add {
     gh 'neovim/nvim-lspconfig',
     gh 'mason-org/mason.nvim',
     gh 'mason-org/mason-lspconfig.nvim',
     gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
   }
-
-  -- Automatically install LSPs and related tools to stdpath for Neovim
   require('mason').setup {}
-
-  -- Translates between nvim-lspconfig server names and mason.nvim package names (e.g. lua_ls <-> lua-language-server)
   require('mason-lspconfig').setup {
     automatic_enable = false, -- Change this to true if you want to automatically enable servers that are installed manually (e.g. via :Mason / :MasonInstall)
   }
-
-  -- Ensure the servers and tools above are installed
-  --
-  -- To check the current status of installed tools and/or manually install
-  -- other tools, you can run
-  --    :Mason
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
     'ty',
@@ -671,16 +559,15 @@ do
     'clangd',
     'bash-language-server',
     'yaml-language-server'
-    -- You can add other tools here that you want Mason to install
   })
-
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
   end
 end
+
+
 
 -- ============================================================
 -- SECTION 7: FORMATTING
