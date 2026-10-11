@@ -38,8 +38,6 @@ do
   vim.o.confirm = true -- Dialog Box to Ask to Save Before Commands that Delete the Buffer
 end
 
-
-
 -- ============================================================
 -- SECTION 2: KEYMAPS & AUTOCMDS
 -- basic keymaps, basic autocmds
@@ -101,8 +99,6 @@ do
   }
 end
 
-
-
 -- ============================================================
 -- SECTION 3: PLUGIN MANAGER INTRO
 -- vim.pack intro, build hooks
@@ -158,18 +154,13 @@ end
 ---@return string
 local function gh(repo) return 'https://github.com/' .. repo end
 
-
-
-
-
-
 -- ============================================================
 -- SECTION 4: UI / CORE UX PLUGINS
 -- guess-indent, gitsigns, which-key, colorscheme, todo-comments, mini modules
 -- ============================================================
 do
   -- [[ Installing and Configuring Plugins ]]
-  -- Guess Indent - Auto Adjust Editor Space/Tab Spacings to Match a Files Indent Style: 
+  -- Guess Indent - Auto Adjust Editor Space/Tab Spacings to Match a Files Indent Style:
   vim.pack.add { gh 'NMAC427/guess-indent.nvim' }
   require('guess-indent').setup {}
 
@@ -250,21 +241,17 @@ do
   -- [[ mini.nvim - Lightweight Editor Toolbox ]]
   vim.pack.add { gh 'nvim-mini/mini.nvim' }
   -- [[ mini.icons - Loads Icons if a Nerf Font is used ]]
-  if vim.g.have_nerd_font then
-    require('mini.icons').setup()
-  end
+  if vim.g.have_nerd_font then require('mini.icons').setup() end
   -- [[ mini.files - File Explorer ]]
   -- Close mini.files:
-  require('mini.files').setup({
+  require('mini.files').setup {
     mappings = {
       close = 'q',
     },
-  })
+  }
   -- Open mini.files:
   vim.keymap.set('n', '-', function()
-    if not MiniFiles.close() then
-      MiniFiles.open()
-    end
+    if not MiniFiles.close() then MiniFiles.open() end
   end, { desc = 'Open mini.files' })
   -- Add Split Mappings to mini.files:
   vim.api.nvim_create_autocmd('User', {
@@ -275,7 +262,7 @@ do
       vim.keymap.set('n', '<C-v>', function()
         local target = MiniFiles.get_explorer_state().target_window
         local new_target = vim.api.nvim_win_call(target, function()
-          vim.cmd('belowright vertical split')
+          vim.cmd 'belowright vertical split'
           return vim.api.nvim_get_current_win()
         end)
         MiniFiles.set_target_window(new_target)
@@ -288,7 +275,7 @@ do
       vim.keymap.set('n', '<C-x>', function()
         local target = MiniFiles.get_explorer_state().target_window
         local new_target = vim.api.nvim_win_call(target, function()
-          vim.cmd('belowright horizontal split')
+          vim.cmd 'belowright horizontal split'
           return vim.api.nvim_get_current_win()
         end)
         MiniFiles.set_target_window(new_target)
@@ -315,8 +302,6 @@ do
   ---@diagnostic disable-next-line: duplicate-set-field
   statusline.section_location = function() return '%2l:%-2v' end
 end
-
-
 
 -- ============================================================
 -- SECTION 5: SEARCH & NAVIGATION
@@ -453,8 +438,6 @@ do
   vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config', follow = true } end, { desc = '[S]earch [N]eovim files' })
 end
 
-
-
 -- ============================================================
 -- SECTION 6: LSP
 -- LSP keymaps, server configuration, Mason tools installations
@@ -476,9 +459,9 @@ do
       map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
       -- EXECUTE A CODE ACTION
       map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-      -- GO TO THE FILE WHERE FUNCTION IS DECLARED 
+      -- GO TO THE FILE WHERE FUNCTION IS DECLARED
       map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-      -- CURSOR-HOLD 
+      -- CURSOR-HOLD
       local client = vim.lsp.get_client_by_id(event.data.client_id)
       if client and client:supports_method('textDocument/documentHighlight', event.buf) then
         local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
@@ -493,7 +476,7 @@ do
           group = highlight_augroup,
           callback = vim.lsp.buf.clear_references,
         })
-      -- Detaching LSP when a Buffer is Cleared
+        -- Detaching LSP when a Buffer is Cleared
         vim.api.nvim_create_autocmd('LspDetach', {
           group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
           callback = function(event2)
@@ -511,7 +494,7 @@ do
 
   -- [[ LANGUAGE SERVER SELECTION & CONFIGURATION ]]
   ---@type table<string, vim.lsp.Config>
- local servers = {
+  local servers = {
     -- Lua Configuration as Reccomended by Neovim Documentation
     lua_ls = {
       on_init = function(client)
@@ -560,7 +543,7 @@ do
     'rust_analyzer',
     'clangd',
     'bash-language-server',
-    'yaml-language-server'
+    'yaml-language-server',
   })
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
   for name, server in pairs(servers) do
@@ -568,8 +551,6 @@ do
     vim.lsp.enable(name)
   end
 end
-
-
 
 -- ============================================================
 -- SECTION 7: FORMATTING
@@ -581,10 +562,15 @@ do
   require('conform').setup {
     notify_on_error = false,
     format_on_save = function(bufnr)
-      -- You can specify filetypes to autoformat on save here:
       local enabled_filetypes = {
-        -- lua = true,
-        -- python = true,
+        lua = true,
+        rust = true,
+        cpp = true,
+        c = true,
+        python = true,
+        yaml = true,
+        json = true,
+        sh = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
@@ -593,23 +579,22 @@ do
       end
     end,
     default_format_opts = {
-      lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
+      lsp_format = 'fallback',
     },
-    -- You can also specify external formatters in here.
     formatters_by_ft = {
-      -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      rust = { 'rustfmt' },
+      cpp = { 'clang-format' },
+      c = { 'clang-format' },
+      python = { 'isort', 'black' },
+      lua = { 'stylua' },
+      yaml = { 'prettier' },
+      json = { 'prettier' },
+      sh = { 'shfmt' },
     },
   }
 
   vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
 end
-
-
 
 -- ============================================================
 -- SECTION 8: AUTOCOMPLETE & SNIPPETS
@@ -632,7 +617,7 @@ do
       -- <c-n>/<c-p> or <up>/<down>: Select next/previous item
       -- <c-e>: Hide menu
       -- <c-k>: Toggle signature help
-      preset = 'default',
+      preset = 'enter',
     },
     appearance = {
       nerd_font_variant = 'mono',
@@ -640,19 +625,15 @@ do
 
     completion = {
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
-
     },
     sources = {
       default = { 'lsp', 'path', 'snippets' },
-
     },
     snippets = { preset = 'luasnip' },
     fuzzy = { implementation = 'prefer_rust_with_warning' },
     signature = { enabled = true },
   }
 end
-
-
 
 -- ============================================================
 -- SECTION 9: TREESITTER
@@ -714,8 +695,6 @@ do
     end,
   })
 end
-
-
 
 -- ============================================================
 -- SECTION 10: OPTIONAL EXAMPLES / NEXT STEPS
