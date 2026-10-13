@@ -520,7 +520,17 @@ do
       ---@type lspconfig.settings.lua_ls
       settings = {
         Lua = {
-          format = { enable = false },
+          format = { enable = true },
+        },
+      },
+    },
+    rust_analyzer = {
+      settings = {
+        ['rust-analyzer'] = {
+          completion = {
+            postfix = { enable = true },
+            autoimport = { enable = true },
+          },
         },
       },
     },
@@ -547,6 +557,17 @@ do
   })
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
   for name, server in pairs(servers) do
+    local ok, blink = pcall(require, 'blink.cmp')
+    if ok then
+      server.capabilities = blink.get_lsp_capabilities(server.capabilities)
+    else
+      server.capabilities = vim.tbl_deep_extend(
+        'force',
+        {},
+        vim.lsp.protocol.make_client_capabilities(),
+        server.capabilities or {}
+      )
+    end
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
   end
@@ -609,6 +630,10 @@ do
 
   -- [[ Autocomplete Engine ]]
   vim.pack.add { { src = gh 'saghen/blink.cmp', version = vim.version.range '1.*' } }
+
+  -- 1. Grab blink's capabilities so language servers know what we support
+  local capabilities = require('blink.cmp').get_lsp_capabilities()
+
   require('blink.cmp').setup {
     keymap = {
       -- All presets have the following mappings:
@@ -627,14 +652,14 @@ do
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
     },
     sources = {
-      default = { 'lsp', 'path', 'snippets' },
+      -- 2. Added 'buffer' here so words in your file always show up as a fallback
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
     snippets = { preset = 'luasnip' },
     fuzzy = { implementation = 'prefer_rust_with_warning' },
     signature = { enabled = true },
   }
 end
-
 -- ============================================================
 -- SECTION 9: TREESITTER
 -- Parser installation, syntax highlighting, folds, indentation
