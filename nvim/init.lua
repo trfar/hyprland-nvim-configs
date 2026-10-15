@@ -527,6 +527,7 @@ do
     rust_analyzer = {
       settings = {
         ['rust-analyzer'] = {
+          cargo = { features = { 'ssr' } },
           completion = {
             postfix = { enable = true },
             autoimport = { enable = true },
@@ -561,12 +562,7 @@ do
     if ok then
       server.capabilities = blink.get_lsp_capabilities(server.capabilities)
     else
-      server.capabilities = vim.tbl_deep_extend(
-        'force',
-        {},
-        vim.lsp.protocol.make_client_capabilities(),
-        server.capabilities or {}
-      )
+      server.capabilities = vim.tbl_deep_extend('force', {}, vim.lsp.protocol.make_client_capabilities(), server.capabilities or {})
     end
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
