@@ -734,29 +734,33 @@ end
 -- Codecompanion for Chat & Inline Edits
 -- ============================================================
 do
-  local ai_host = vim.env.AI_HOST or 'localhost'
+  local ai_url = vim.env.NVIM_AI_URL or 'http://localhost:8080' -- Llama.cpp Stnd.
+  local ai_model_name = vim.env.NVIM_AI_MODEL_NAME
+  local ai_api_key = vim.env.NVIM_AI_API_KEY or 'none'
+  local ai_chat_url = vim.env.NVIM_AI_CHAT_URL or '/v1/chat/completions' -- OpenAI Stnd.
   -- TODO: Add exporting of Local Variables to Readme
+  -- TODO: Add .env.examples
   vim.pack.add { gh 'olimorris/codecompanion.nvim' }
   require('codecompanion').setup {
     adapters = {
       http = {
-        vllm = function()
+        local_llm = function()
           return require('codecompanion.adapters').extend('openai_compatible', {
             env = {
-              url = 'http://' .. ai_host .. ':8000',
-              api_key = vim.env.AI_API_KEY or 'none',
-              chat_url = '/v1/chat/completions',
+              url = ai_url,
+              api_key = ai_api_key,
+              chat_url = ai_chat_url,
             },
             schema = {
-              model = { default = 'Qwen3.8' },
+              model = { default = ai_model_name },
             },
           })
         end,
       },
     },
     strategies = {
-      chat = { adapter = 'vllm' },
-      inline = { adapter = 'vllm' },
+      chat = { adapter = 'local_llm' },
+      inline = { adapter = 'local_llm' },
     },
   }
 
