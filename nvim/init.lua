@@ -729,4 +729,41 @@ do
   -- require 'kickstart.plugins.neo-tree'
 end
 
+-- ============================================================
+-- SECTION 11: AI
+-- Codecompanion for Chat & Inline Edits
+-- ============================================================
+do
+  local ai_host = vim.env.AI_HOST or 'localhost'
+  -- TODO: Add exporting of Local Variables to Readme
+  vim.pack.add { gh 'olimorris/codecompanion.nvim' }
+  require('codecompanion').setup {
+    adapters = {
+      http = {
+        vllm = function()
+          return require('codecompanion.adapters').extend('openai_compatible', {
+            env = {
+              url = 'http://' .. ai_host .. ':8000',
+              api_key = vim.env.AI_API_KEY or 'none',
+              chat_url = '/v1/chat/completions',
+            },
+            schema = {
+              model = { default = 'Qwen3.8' },
+            },
+          })
+        end,
+      },
+    },
+    strategies = {
+      chat = { adapter = 'vllm' },
+      inline = { adapter = 'vllm' },
+    },
+  }
+
+  vim.keymap.set({ 'n', 'v' }, '<leader>aa', '<cmd>CodeCompanionChat Toggle<cr>', { desc = '[A]I [A] chat toggle' })
+  vim.keymap.set({ 'n', 'v' }, '<leader>ac', '<cmd>CodeCompanionActions<cr>', { desc = '[A]I [C]ommands/actions' })
+  vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { desc = '[A]dd selection to AI chat' })
+  vim.cmd [[cnoreabbrev cc CodeCompanion]]
+end
+
 -- vim: ts=2 sts=2 sw=2 et
