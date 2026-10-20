@@ -156,7 +156,7 @@ local function gh(repo) return 'https://github.com/' .. repo end
 
 -- ============================================================
 -- SECTION 4: UI / CORE UX PLUGINS
--- guess-indent, gitsigns, which-key, colorscheme, todo-comments, mini modules
+-- guess-indent, gitsigns, which-key, colorscheme, mini modules
 -- ============================================================
 do
   -- [[ Installing and Configuring Plugins ]]
@@ -619,7 +619,7 @@ end
 -- ============================================================
 do
   -- [[ Snippet Engine ]]
-  vim.pack.add { 'L3MON4D3/LuaSnip' }
+  vim.pack.add { gh 'L3MON4D3/LuaSnip' }
   require('luasnip').setup {}
   vim.pack.add { gh 'rafamadriz/friendly-snippets' }
   require('luasnip.loaders.from_vscode').lazy_load()
@@ -738,8 +738,6 @@ do
   local ai_model_name = vim.env.NVIM_AI_MODEL_NAME
   local ai_api_key = vim.env.NVIM_AI_API_KEY or 'none'
   local ai_chat_url = vim.env.NVIM_AI_CHAT_URL or '/v1/chat/completions' -- OpenAI Stnd.
-  -- TODO: Add exporting of Local Variables to Readme
-  -- TODO: Add .env.examples
   vim.pack.add { gh 'olimorris/codecompanion.nvim' }
   require('codecompanion').setup {
     adapters = {
@@ -768,6 +766,17 @@ do
   vim.keymap.set({ 'n', 'v' }, '<leader>ac', '<cmd>CodeCompanionActions<cr>', { desc = '[A]I [C]ommands/actions' })
   vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { desc = '[A]dd selection to AI chat' })
   vim.cmd [[cnoreabbrev cc CodeCompanion]]
+end
+
+-- ============================================================
+-- SECTION 12: Flash
+-- Moving the Cursor around a Buffer
+-- ============================================================
+do
+  vim.pack.add { gh 'folke/flash.nvim' }
+  require('flash').setup {}
+  vim.keymap.set({ 'n', 'x', 'o' }, 'gs', function() require('flash').jump() end, { desc = 'Flash jump' })
+  vim.keymap.set({ 'n', 'x', 'o' }, 'gS', function() require('flash').treesitter() end, { desc = 'Flash treesitter select' })
 end
 
 -- vim: ts=2 sts=2 sw=2 et
