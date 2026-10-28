@@ -145,6 +145,11 @@ do
         vim.cmd 'TSUpdate'
         return
       end
+
+      if name == 'markdown-preview.nvim' then
+        if vim.fn.executable 'npm' == 1 then run_build(name, { 'npm', 'install' }, ev.data.path .. '/app') end
+        return
+      end
     end,
   })
 end
@@ -777,6 +782,26 @@ do
   require('flash').setup {}
   vim.keymap.set({ 'n', 'x', 'o' }, 'gs', function() require('flash').jump() end, { desc = 'Flash jump' })
   vim.keymap.set({ 'n', 'x', 'o' }, 'gS', function() require('flash').treesitter() end, { desc = 'Flash treesitter select' })
+end
+
+-- ============================================================
+-- SECTION 13: MARKDOWN
+-- Browser Preview Markdown Files (Github Style)
+-- ============================================================
+do
+  -- Browser preview
+  vim.g.mkdp_auto_close = 0 -- keep preview open when switching buffers
+  vim.g.mkdp_theme = 'dark' -- or 'light'
+  vim.pack.add { gh 'iamcco/markdown-preview.nvim' }
+
+  vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'markdown',
+    callback = function(ev) vim.keymap.set('n', '<leader>mp', '<cmd>MarkdownPreviewToggle<cr>', { buffer = ev.buf, desc = '[M]arkdown [P]review toggle' }) end,
+  })
+
+  -- In-buffer rendering
+  vim.pack.add { gh 'MeanderingProgrammer/render-markdown.nvim' }
+  require('render-markdown').setup {}
 end
 
 -- vim: ts=2 sts=2 sw=2 et
