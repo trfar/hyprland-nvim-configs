@@ -129,24 +129,6 @@ hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "al
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
 
--- Ref https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
--- "Smart gaps" / "No gaps when only"
--- uncomment all if you wish to use that.
--- hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
--- hl.workspace_rule({ workspace = "f[1]",   gaps_out = 0, gaps_in = 0 })
--- hl.window_rule({
---     name  = "no-gaps-wtv1",
---     match = { float = false, workspace = "w[tv1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
--- hl.window_rule({
---     name  = "no-gaps-f1",
---     match = { float = false, workspace = "f[1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
-
 -- DWINDLE CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
 	dwindle = {
@@ -173,8 +155,8 @@ hl.config({
 ----------------
 hl.config({
 	misc = {
-		force_default_wallpaper = 0, -- Set to 0 or 1 to disable the anime mascot wallpapers
-		disable_hyprland_logo = true, -- If true disables the random hyprland logo / anime girl background. :(
+		force_default_wallpaper = 0,
+		disable_hyprland_logo = true,
 	},
 })
 
@@ -203,7 +185,8 @@ hl.config({
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Opening Terminal & Closing Windows:
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + Q", hl.dsp.workspace.toggle_special("term"))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(terminal))
 local closeWindowBind = hl.bind(mainMod .. " + grave", hl.dsp.window.close())
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + tab", hl.dsp.exec_cmd(browser))
@@ -211,7 +194,8 @@ hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(obsidian))
 
 -- Screen Snips:
 hl.bind(mainMod .. " + SHIFT + c", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
--- closeWindowBind:set_enabled(false)
+
+-- Shutdown:
 hl.bind(
 	mainMod .. " + M",
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
@@ -227,20 +211,18 @@ hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + j", hl.dsp.focus({ direction = "down" }))
 
--- Switch workspaces with mainMod + [0-9]
--- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 10 do
-	local key = i % 10 -- 10 maps to key 0
-	hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
-end
-
 -- Binding Lock Screen:
 hl.bind(mainMod .. " + SHIFT + l", hl.dsp.exec_cmd(lockscreen))
 
--- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+-- Switch workspaces with mainMod + [0-9]
+-- Move active window to a workspace with mainMod + SHIFT + [0-9]
+for i = 1, 2 do
+	hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
+	hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+end
+
+-- Setting up Terminal Scratchpad
+hl.workspace_rule({ workspace = "special:term", on_created_empty = terminal })
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
