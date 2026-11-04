@@ -10,13 +10,13 @@ require("monitors")
 ---- MY PROGRAMS ----
 ---------------------
 -- Set programs that you use
-local terminal = "kitty"
+local terminal = "alacritty"
 local fileManager = "/home/trfar/.local/bin/strata"
 local menu = "fuzzel --config=/home/trfar/.config/fuzzel/fuzzle.ini"
 local lockscreen = "hyprlock"
-local statusbar = "ashell"
+-- local statusbar = "ashell"
 local browser = "zen-browser"
-local obsidian = "obsidian"
+local obsidian = "obsidian --disable-gpu"
 local idle_daemon = "hypridle"
 local wallpaper_daemon = "swaybg"
 
@@ -28,7 +28,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd(wallpaper_daemon .. " -o DP-2 -i /home/trfar/Pictures/Wallpapers/Active-Cropped.png ")
 	hl.exec_cmd(idle_daemon)
 	hl.exec_cmd(lockscreen)
-	hl.exec_cmd(statusbar)
+	-- hl.exec_cmd(statusbar)
 end)
 
 -------------------------------
@@ -82,14 +82,14 @@ hl.config({
 		inactive_opacity = 0.92,
 
 		shadow = {
-			enabled = true,
+			enabled = false,
 			range = 4,
 			render_power = 3,
 			color = 0xee1a1a1a,
 		},
 
 		blur = {
-			enabled = true,
+			enabled = false,
 			size = 3,
 			passes = 1,
 			vibrancy = 0.1696,
