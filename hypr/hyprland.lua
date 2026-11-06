@@ -1,15 +1,16 @@
--- Getting rid of hl varible undefined flag
+-- Getting rid of hl varible undefined flags
 ---@diagnostic disable: undefined-global
 
 ------------------
 ---- MONITORS ----
 ------------------
+--   DP-2 = Left Vertical ASUS 1080p  (stacking / master layout)
+--   DP-1 = Right Main LG 1440p      (scrolling layout)
 require("monitors")
 
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
--- Set programs that you use
 local terminal = "alacritty"
 local fileManager = "/home/trfar/.local/bin/strata"
 local menu = "fuzzel"
@@ -18,6 +19,9 @@ local browser = "zen-browser"
 local obsidian = "obsidian --disable-gpu"
 local idle_daemon = "hypridle"
 local wallpaper_daemon = "swaybg"
+
+local RIGHT = "DP-1" -- LG UltraGear, scrolling
+local LEFT = "DP-2" -- ASUS vertical, stacking
 
 -------------------
 ---- AUTOSTART ----
@@ -51,7 +55,44 @@ hl.config({
 		},
 		resize_on_border = false,
 		allow_tearing = true,
-		layout = "dwindle",
+
+		-- Global default. The left monitor's workspaces override this below.
+		layout = "scrolling",
+	},
+
+	scrolling = {
+		-- A single window fills the monitor
+		fullscreen_on_one_column = true,
+
+		-- Default width of new columns
+		column_width = 0.5,
+
+		-- Bring focused columns fully into view
+		focus_fit_method = 1,
+
+		-- Automatically follow focused windows
+		follow_focus = 1,
+
+		-- How much of a window must remain visible
+		follow_min_visible = 0.4,
+
+		-- Useful predefined column widths (cycled with SUPER + R)
+		explicit_column_widths = "0.333, 0.5, 0.667, 1.0",
+
+		-- Cycle around the scrolling workspace
+		wrap_focus = true,
+		wrap_swapcol = true,
+
+		-- New windows appear to the right
+		direction = "right",
+	},
+
+	-- Used by the left monitor's workspaces
+	master = {
+		-- Big window on top, new windows join the stack below it
+		new_status = "slave",
+		mfact = 0.6,
+		orientation = "top",
 	},
 
 	decoration = {
@@ -110,13 +151,6 @@ hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "al
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
 
--- DWINDLE CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
-hl.config({
-	dwindle = {
-		preserve_split = true, -- You probably want this
-	},
-})
-
 ----------------
 ----  MISC  ----
 ----------------
@@ -140,51 +174,101 @@ hl.config({
 	},
 })
 
+----------------------------------------
+---- WORKSPACES (PER-MONITOR LAYOUT) ----
+----------------------------------------
+-- Workspaces 1-5  -> right monitor (DP-1), scrolling
+-- Workspaces 6-10 -> left monitor  (DP-2), master layout, big window on top
+for i = 1, 5 do
+	hl.workspace_rule({
+		workspace = tostring(i),
+		monitor = RIGHT,
+		layout = "scrolling",
+		default = (i == 1),
+		persistent = (i == 1),
+	})
+end
+
+for i = 6, 10 do
+	hl.workspace_rule({
+		workspace = tostring(i),
+		monitor = LEFT,
+		layout = "master",
+		layout_opts = { orientation = "top" },
+		default = (i == 6),
+		persistent = (i == 6),
+	})
+end
+
+-- Terminal scratchpad
+hl.workspace_rule({ workspace = "special:term", on_created_empty = terminal })
+
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
+local mainMod = "SUPER"
 
-local mainMod = "SUPER" -- Sets "Windows" key as main modifier
-
--- Opening Terminal & Closing Windows:
-hl.bind(mainMod .. " + Q", hl.dsp.workspace.toggle_special("term"))
+-- Apps
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + grave", hl.dsp.window.close())
+hl.bind(mainMod .. " + Q", hl.dsp.workspace.toggle_special("term"))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + tab", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(obsidian))
+hl.bind(mainMod .. " + space", hl.dsp.exec_cmd(menu))
 
--- Screen Snips:
+-- Window basics
+hl.bind(mainMod .. " + grave", hl.dsp.window.close())
+hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
+
+-- Screen snip
 hl.bind(mainMod .. " + SHIFT + c", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
 
--- Shutdown:
+-- Lock / shutdown
+-- (Lock moved off SUPER+SHIFT+L, which is now "move window right")
+hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd(lockscreen))
 hl.bind(
 	mainMod .. " + M",
-	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
+	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit")
 )
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + space", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit")) -- dwindle only
 
--- Move focus with mainMod & Neovim Binds:
+-- Focus (vim keys). Crosses between monitors at the edge of a workspace.
 hl.bind(mainMod .. " + h", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + l", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + k", hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + j", hl.dsp.focus({ direction = "down" }))
 
--- Binding Lock Screen:
-hl.bind(mainMod .. " + SHIFT + l", hl.dsp.exec_cmd(lockscreen))
+-- Move window within the layout
+hl.bind(mainMod .. " + SHIFT + h", hl.dsp.window.move({ direction = "left" }))
+hl.bind(mainMod .. " + SHIFT + l", hl.dsp.window.move({ direction = "right" }))
+hl.bind(mainMod .. " + SHIFT + k", hl.dsp.window.move({ direction = "up" }))
+hl.bind(mainMod .. " + SHIFT + j", hl.dsp.window.move({ direction = "down" }))
 
--- Switch workspaces with mainMod + [0-9]
--- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 2 do
-	hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
-	hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+-- Send window to the other monitor (and follow it)
+hl.bind(mainMod .. " + ALT + h", hl.dsp.window.move({ monitor = "l", follow = true }))
+hl.bind(mainMod .. " + ALT + l", hl.dsp.window.move({ monitor = "r", follow = true }))
+
+-- Scrolling layout controls (right monitor)
+hl.bind(mainMod .. " + period", hl.dsp.layout("move +col")) -- scroll view right
+hl.bind(mainMod .. " + comma", hl.dsp.layout("move -col")) -- scroll view left
+hl.bind(mainMod .. " + CTRL + h", hl.dsp.layout("swapcol l")) -- swap column left
+hl.bind(mainMod .. " + CTRL + l", hl.dsp.layout("swapcol r")) -- swap column right
+hl.bind(mainMod .. " + R", hl.dsp.layout("colresize +conf")) -- cycle column widths
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.layout("colresize -conf"))
+hl.bind(mainMod .. " + bracketleft", hl.dsp.layout("consume_or_expel prev")) -- merge into / split out of column
+hl.bind(mainMod .. " + bracketright", hl.dsp.layout("consume_or_expel next"))
+
+-- Master layout controls (left monitor)
+hl.bind(mainMod .. " + Return", hl.dsp.layout("swapwithmaster")) -- promote focused window to the big slot
+hl.bind(mainMod .. " + O", hl.dsp.layout("orientationnext")) -- cycle top/right/bottom/left
+
+-- Workspaces: SUPER + 1-5 = right monitor, SUPER + 6-0 = left monitor (0 = workspace 10)
+-- SUPER + SHIFT + number sends the focused window to that workspace
+for i = 1, 10 do
+	local key = i % 10
+	hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
+	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
-
--- Setting up Terminal Scratchpad
-hl.workspace_rule({ workspace = "special:term", on_created_empty = terminal })
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -194,7 +278,7 @@ hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Laptop multimedia keys for volume and LCD brightness
+-- Multimedia keys
 hl.bind(
 	"XF86AudioRaiseVolume",
 	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
@@ -224,10 +308,8 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
--- Example window rules that are useful
-
 hl.window_rule({
-	-- Ignore maximize requests from all apps. You'll probably like this.
+	-- Ignore maximize requests from all apps.
 	name = "suppress-maximize-events",
 	match = { class = ".*" },
 
