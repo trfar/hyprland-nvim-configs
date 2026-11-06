@@ -550,7 +550,7 @@ do
   }
   require('mason').setup {}
   require('mason-lspconfig').setup {
-    automatic_enable = false, -- Change this to true if you want to automatically enable servers that are installed manually (e.g. via :Mason / :MasonInstall)
+    automatic_enable = { exclude = { 'stylua' } }, -- stylua is a formatter here, not a wanted LSP
   }
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
@@ -590,9 +590,6 @@ do
         cpp = true,
         c = true,
         python = true,
-        yaml = true,
-        json = true,
-        sh = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
@@ -609,9 +606,6 @@ do
       c = { 'clang-format' },
       python = { 'isort', 'black' },
       lua = { 'stylua' },
-      yaml = { 'prettier' },
-      json = { 'prettier' },
-      sh = { 'shfmt' },
     },
   }
 
@@ -723,15 +717,10 @@ do
 end
 
 -- ============================================================
--- SECTION 10: OPTIONAL EXAMPLES / NEXT STEPS
--- kickstart.plugins.* examples
+-- SECTION 10: PLUGINS
 -- ============================================================
 do
-  require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
-  -- require 'kickstart.plugins.lint'
   require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
 end
 
 -- ============================================================

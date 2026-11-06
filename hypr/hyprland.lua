@@ -12,9 +12,8 @@ require("monitors")
 -- Set programs that you use
 local terminal = "alacritty"
 local fileManager = "/home/trfar/.local/bin/strata"
-local menu = "fuzzel --config=/home/trfar/.config/fuzzel/fuzzle.ini"
+local menu = "fuzzel"
 local lockscreen = "hyprlock"
--- local statusbar = "ashell"
 local browser = "zen-browser"
 local obsidian = "obsidian --disable-gpu"
 local idle_daemon = "hypridle"
@@ -28,7 +27,6 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd(wallpaper_daemon .. " -o DP-2 -i /home/trfar/Pictures/Wallpapers/Active-Cropped.png ")
 	hl.exec_cmd(idle_daemon)
 	hl.exec_cmd(lockscreen)
-	-- hl.exec_cmd(statusbar)
 end)
 
 -------------------------------
@@ -36,23 +34,6 @@ end)
 -------------------------------
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
-
------------------------
------ PERMISSIONS -----
------------------------
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Permissions/
--- Please note permission changes here require a Hyprland restart and are not applied on-the-fly
--- for security reasons
-
--- hl.config({
---   ecosystem = {
---     enforce_permissions = true,
---   },
--- })
-
--- hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
--- hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
--- hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 -----------------------
 ---- LOOK AND FEEL ----
@@ -136,20 +117,6 @@ hl.config({
 	},
 })
 
--- MASTER CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Master-Layout/ for more
-hl.config({
-	master = {
-		new_status = "master",
-	},
-})
-
--- SCROLLING (NIRI) CONFIG: See https://wiki.hypr.land/Configuring/Layouts/Scrolling-Layout/ for more
-hl.config({
-	scrolling = {
-		fullscreen_on_one_column = true,
-	},
-})
-
 ----------------
 ----  MISC  ----
 ----------------
@@ -166,12 +133,7 @@ hl.config({
 hl.config({
 	input = {
 		kb_layout = "us",
-		kb_variant = "",
-		kb_model = "",
-		kb_options = "",
-		kb_rules = "",
 		follow_mouse = 1,
-		sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
 		touchpad = {
 			natural_scroll = false,
 		},
@@ -187,7 +149,7 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 -- Opening Terminal & Closing Windows:
 hl.bind(mainMod .. " + Q", hl.dsp.workspace.toggle_special("term"))
 hl.bind(mainMod .. " + S", hl.dsp.exec_cmd(terminal))
-local closeWindowBind = hl.bind(mainMod .. " + grave", hl.dsp.window.close())
+hl.bind(mainMod .. " + grave", hl.dsp.window.close())
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + tab", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(obsidian))
@@ -253,9 +215,6 @@ hl.bind(
 	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
 	{ locked = true, repeating = true }
 )
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
-
 -- Requires playerctl
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
@@ -267,14 +226,13 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 --------------------------------
 -- Example window rules that are useful
 
-local suppressMaximizeRule = hl.window_rule({
+hl.window_rule({
 	-- Ignore maximize requests from all apps. You'll probably like this.
 	name = "suppress-maximize-events",
 	match = { class = ".*" },
 
 	suppress_event = "maximize",
 })
--- suppressMaximizeRule:set_enabled(false)
 
 hl.window_rule({
 	-- Fix some dragging issues with XWayland
