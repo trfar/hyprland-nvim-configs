@@ -1,4 +1,4 @@
--- Getting rid of hl varible undefined flags
+-- Getting rid of hl varible undefined fla-- Getting rid of hl varible undefined flag
 ---@diagnostic disable: undefined-global
 
 ------------------
@@ -131,7 +131,7 @@ hl.curve("almostLinear", { type = "bezier", points = { { 0.5, 0.5 }, { 0.75, 1 }
 hl.curve("quick", { type = "bezier", points = { { 0.15, 0 }, { 0.1, 1 } } })
 
 -- Default springs
-hl.curve("easy", { type = "spring", mass = 1, stiffness = 238.1191, dampening = 24.21279333 })
+hl.curve("easy", { type = "spring", mass = 1, stiffness = 238.1191, damping = 24.21279333 })
 
 hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
 hl.animation({ leaf = "border", enabled = true, speed = 5.39, bezier = "easeOutQuint" })
@@ -201,7 +201,11 @@ for i = 6, 10 do
 end
 
 -- Terminal scratchpad
-hl.workspace_rule({ workspace = "special:term", on_created_empty = terminal })
+hl.on("workspace.created", function(ws)
+	if ws.name == "special:term" and ws.is_empty then
+		hl.exec_cmd(terminal)
+	end
+end)
 
 ---------------------
 ---- KEYBINDINGS ----
