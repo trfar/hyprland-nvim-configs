@@ -1,34 +1,83 @@
--- Getting rid of hl varible undefined fla-- Getting rid of hl varible undefined flag
+-- Silence the lua language server's "hl undefined" warnings
 ---@diagnostic disable: undefined-global
+
+------------------------
+---- MACHINE .env ----
+------------------------
+-- Optional hypr/.env (KEY=VALUE, # comments) loaded from the directory this
+-- file was started from (see .env.example). Missing file or key -> the
+-- default shown here, so a machine without a .env keeps working as before.
+local function configDir()
+	local src = debug.getinfo(1, "S").source:match("^@?(.*)$")
+	local dir = src:match("^(.+)/[^/]+$")
+	if dir and #dir > 0 then return dir end
+	local home = os.getenv("HOME") or ""
+	local xdg = os.getenv("XDG_CONFIG_HOME")
+	return (xdg and xdg ~= "" and xdg or home .. "/.config") .. "/hypr"
+end
+
+local env = {}
+local function loadEnv(path)
+	local f = io.open(path)
+	if not f then return end
+	for line in f:lines() do
+		if not line:match("^%s*#") then
+			local k, v = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
+			if k then env[k] = v end
+		end
+	end
+	f:close()
+end
+loadEnv(configDir() .. "/.env")
+-- .env value, or nil if the key is missing/empty; caller decides the fallback.
+local function envVal(key)
+	local v = env[key]
+	return (v and v ~= "") and v or nil
+end
 
 ------------------
 ---- MONITORS ----
 ------------------
---   DP-2 = Left Vertical ASUS 1080p  (stacking / master layout)
---   DP-1 = Right Main LG 1440p      (scrolling layout)
-require("monitors")
+-- monitors.lua holds this machine's per-monitor resolution/position/rotation
+-- and is loaded only if it exists; without it Hyprland auto-detects monitors
+-- (fine for a single built-in display).
+do
+	local f = io.open(configDir() .. "/monitors.lua")
+	if f then
+		f:close()
+		require("monitors")
+	end
+end
 
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
-local terminal = "alacritty"
-local fileManager = "/home/trfar/.local/bin/strata"
-local menu = "fuzzel"
+local terminal = envVal("TERMINAL") or "alacritty"
+local fileManager = envVal("FILEMANAGER") or "/home/trfar/.local/bin/strata"
+local menu = envVal("MENU") or "fuzzel"
 local lockscreen = "hyprlock"
-local browser = "zen-browser"
-local obsidian = "obsidian --disable-gpu"
+local browser = envVal("BROWSER") or "zen-browser"
+local obsidian = envVal("OBSIDIAN") or "obsidian --disable-gpu"
 local idle_daemon = "hypridle"
 local wallpaper_daemon = "swaybg"
 
-local RIGHT = "DP-1" -- LG UltraGear, scrolling
-local LEFT = "DP-2" -- ASUS vertical, stacking
+local PRIMARY = envVal("PRIMARY_MONITOR") or "DP-1" -- main monitor, scrolling
+-- Explicit empty SECONDARY_MONITOR in .env = single-monitor setup;
+-- a machine with no .env key keeps the dual layout.
+local SECONDARY = (env["SECONDARY_MONITOR"] ~= nil) and env["SECONDARY_MONITOR"] or "DP-2"
 
 -------------------
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function()
-	hl.exec_cmd(wallpaper_daemon .. " -o DP-1 -i /home/trfar/Pictures/Wallpapers/Active.png")
-	hl.exec_cmd(wallpaper_daemon .. " -o DP-2 -i /home/trfar/Pictures/Wallpapers/Active-Cropped.png ")
+	local wp1 = env["WALLPAPER_PRIMARY"] or "/home/trfar/Pictures/Wallpapers/Active.png"
+	if wp1 ~= "" then
+		hl.exec_cmd(wallpaper_daemon .. " -o " .. PRIMARY .. " -i " .. wp1)
+	end
+	local wp2 = env["WALLPAPER_SECONDARY"] or "/home/trfar/Pictures/Wallpapers/Active-Cropped.png"
+	if SECONDARY ~= "" and wp2 ~= "" then
+		hl.exec_cmd(wallpaper_daemon .. " -o " .. SECONDARY .. " -i " .. wp2)
+	end
 	hl.exec_cmd(idle_daemon)
 	hl.exec_cmd(lockscreen)
 end)
@@ -177,27 +226,39 @@ hl.config({
 ----------------------------------------
 ---- WORKSPACES (PER-MONITOR LAYOUT) ----
 ----------------------------------------
--- Workspaces 1-5  -> right monitor (DP-1), scrolling
--- Workspaces 6-10 -> left monitor  (DP-2), master layout, big window on top
-for i = 1, 5 do
-	hl.workspace_rule({
-		workspace = tostring(i),
-		monitor = RIGHT,
-		layout = "scrolling",
-		default = (i == 1),
-		persistent = (i == 1),
-	})
-end
+-- Dual monitor:  workspaces 1-5 -> PRIMARY, scrolling
+--                workspaces 6-10 -> SECONDARY, master layout, big window on top
+-- Single monitor (SECONDARY_MONITOR empty): all 1-10 on the one monitor, scrolling
+if SECONDARY == "" then
+	for i = 1, 10 do
+		hl.workspace_rule({
+			workspace = tostring(i),
+			layout = "scrolling",
+			default = (i == 1),
+			persistent = (i == 1),
+		})
+	end
+else
+	for i = 1, 5 do
+		hl.workspace_rule({
+			workspace = tostring(i),
+			monitor = PRIMARY,
+			layout = "scrolling",
+			default = (i == 1),
+			persistent = (i == 1),
+		})
+	end
 
-for i = 6, 10 do
-	hl.workspace_rule({
-		workspace = tostring(i),
-		monitor = LEFT,
-		layout = "master",
-		layout_opts = { orientation = "top" },
-		default = (i == 6),
-		persistent = (i == 6),
-	})
+	for i = 6, 10 do
+		hl.workspace_rule({
+			workspace = tostring(i),
+			monitor = SECONDARY,
+			layout = "master",
+			layout_opts = { orientation = "top" },
+			default = (i == 6),
+			persistent = (i == 6),
+		})
+	end
 end
 
 -- Terminal scratchpad
