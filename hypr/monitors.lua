@@ -16,4 +16,5 @@ hl.monitor({
 	mode = "2560x1440@144",
 	position = "auto-right",
 	scale = 1,
+	vrr = 1,
 })

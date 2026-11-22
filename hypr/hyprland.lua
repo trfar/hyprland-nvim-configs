@@ -10,7 +10,9 @@
 local function configDir()
 	local src = debug.getinfo(1, "S").source:match("^@?(.*)$")
 	local dir = src:match("^(.+)/[^/]+$")
-	if dir and #dir > 0 then return dir end
+	if dir and #dir > 0 then
+		return dir
+	end
 	local home = os.getenv("HOME") or ""
 	local xdg = os.getenv("XDG_CONFIG_HOME")
 	return (xdg and xdg ~= "" and xdg or home .. "/.config") .. "/hypr"
@@ -19,11 +21,15 @@ end
 local env = {}
 local function loadEnv(path)
 	local f = io.open(path)
-	if not f then return end
+	if not f then
+		return
+	end
 	for line in f:lines() do
 		if not line:match("^%s*#") then
 			local k, v = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
-			if k then env[k] = v end
+			if k then
+				env[k] = v
+			end
 		end
 	end
 	f:close()
@@ -207,6 +213,7 @@ hl.config({
 	misc = {
 		force_default_wallpaper = 0,
 		disable_hyprland_logo = true,
+		vrr = 1,
 	},
 })
 
