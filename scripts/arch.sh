@@ -1,52 +1,40 @@
 #!/usr/bin/env bash
-# arch.sh — Hyprland setup for Arch-based distros (Arch, CachyOS, EndeavourOS, ...).
+# arch.sh — set up Hyprland on Arch-based distros (Arch, CachyOS, EndeavourOS, ...).
 #
-# Does three things:
-#   1. Installs the packages the hyprland config needs (pacman)
-#   2. Symlinks hypr/* into ~/.config/hypr (existing real files are backed up to *.bak)
-#   3. Creates hypr/.env from .env.example if it doesn't exist yet
+# Steps:
+#   1. Install the packages this config needs (pacman; SKIP_PACKAGES=1 to skip)
+#   2. Symlink hypr/* into ~/.config/hypr (existing real files are moved to *.bak)
+#   3. Create hypr/.env from .env.example if missing, then symlink it
 #
-# Usage:
-#   scripts/arch.sh                # packages + links + .env
-#   SKIP_PACKAGES=1 scripts/arch.sh  # links + .env only (manage packages yourself)
+# Not in pacman (manual): obsidian-bin (AUR), strata (custom binary -> ~/.local/bin)
 #
-# After it finishes:
-#   1. Edit hypr/.env for your machine (monitor names via `hyprctl monitors`)
-#   2. Adjust hypr/monitors.lua (per-monitor resolution/position) if needed
-#   3. Log out / back in (or `hyprctl reload`)
+# After running: edit hypr/.env (monitor names via `hyprctl monitors`),
+# then log out/in or `hyprctl reload`.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CFG="$HOME/.config/hypr"
 
-# --- 1. Packages -----------------------------------------------------------
-# Not in pacman (install with your AUR helper or skip):
-#   obsidian-bin        (AUR) — note app, see OBSIDIAN in hypr/.env
-#   strata              custom binary, copy it to ~/.local/bin/strata or
-#                       point FILEMANAGER in hypr/.env at something else
+#1. packages --------------------------------------------------------------
 if [ "${SKIP_PACKAGES:-0}" != "1" ]; then
+	# compositor + lock + idle | terminal | launcher | screenshots + clipboard
+	# wallpaper daemon | browser | audio stack + media keys | file-dialog portals
 	sudo pacman -S --needed \
-		hyprland \
-		hyprlock \
-		hypridle \
+		hyprland hyprlock hypridle \
 		alacritty \
 		fuzzel \
-		grim \
-		slurp \
-		wl-clipboard \
-		swaybg \
+		grim slurp wl-clipboard \
+		swbg \
 		zen-browser \
-		pipewire \
-		wireplumber \
-		playerctl \
+		pipewire wireplumber playerctl \
 		xdg-desktop-portal-hyprland
 else
 	echo ">> SKIP_PACKAGES=1 — skipping pacman"
 fi
 
-# --- 2. Symlink config files ------------------------------------------------
-link() {
+#2. symlinks into ~/.config/hypr ------------------------------------------
+link() { # src dest — refresh symlink; back up an existing real file to *.bak
 	local src="$1" dest="$2"
 	if [ -L "$dest" ]; then
 		ln -sfn "$src" "$dest"
@@ -66,7 +54,7 @@ for f in hyprland.lua monitors.lua hyprlock.conf hypridle.conf; do
 	link "$ROOT/hypr/$f" "$CFG/$f"
 done
 
-# --- 3. .env -----------------------------------------------------------------
+#3. .env — per-machine values (gitignored) ---------------------------------
 if [ ! -e "$ROOT/hypr/.env" ]; then
 	cp "$ROOT/hypr/.env.example" "$ROOT/hypr/.env"
 	echo "   created $ROOT/hypr/.env (copy of .env.example)"
@@ -74,11 +62,5 @@ fi
 link "$ROOT/hypr/.env" "$CFG/.env"
 
 echo
-echo ">> Done. Next steps:"
-echo "   1. Edit $ROOT/hypr/.env  (SECONDARY_MONITOR empty = single-monitor setup;"
-echo "      find monitor names with: hyprctl monitors)"
-echo "   2. Check $ROOT/hypr/monitors.lua (resolution/position per monitor;"
-echo "      optional — delete it to let Hyprland auto-detect)"
-echo "   3. Check $ROOT/hypr/hyprlock.conf background blocks (they hardcode"
-echo "      monitor names and wallpaper paths)"
-echo "   4. Log out / back in, or: hyprctl reload"
+echo ">> Done. Next: edit $ROOT/hypr/.env (SECONDARY_MONITOR empty = single monitor),"
+echo "   check hypr/monitors.lua and the hyprlock.conf background blocks, then log out/in."

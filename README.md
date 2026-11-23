@@ -15,7 +15,8 @@ Configuration for my Neovim & Hyprland installations.
 ```sh
 git clone <this repo>
 cd hyprland-nvim-configs
-scripts/arch.sh          # installs packages + symlinks hypr/ into ~/.config/hypr
+scripts/arch.sh          # Arch/CachyOS/...: installs packages (pacman) + symlinks hypr/ into ~/.config/hypr
+scripts/debian.sh        # Debian 13+ (trixie): installs packages (apt) + symlinks hypr/ into ~/.config/hypr
 ```
 
 Then edit `hypr/.env` for your machine and log out / back in.
