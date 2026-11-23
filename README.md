@@ -50,6 +50,16 @@ Symlink each file from `hypr/` into `~/.config/hypr/` (`hyprland.lua`, `monitors
 
 ## Neovim:
 
+### Install (macOS, Apple Silicon):
+
+```sh
+git clone <this repo>
+cd hyprland-nvim-configs
+scripts/mac.sh           # brew: neovim + ripgrep/fd/lazygit, symlinks nvim/ into ~/.config/nvim
+```
+
+Plugins, LSP servers and treesitter parsers install themselves on first nvim run (slow the first time). Requires Homebrew first — the script tells you how if it's missing.
+
 ### .env
 
 The nvim/.env.example has global variables you must copy enter & copy over to your shell source file (Instructions within the file for fish vs bash shells). These variables include settings for:
