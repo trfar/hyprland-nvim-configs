@@ -13,7 +13,7 @@ Configuration for my Neovim & Hyprland installations.
 ### New machine (Arch / CachyOS / ...):
 
 ```sh
-git clone <this repo>
+git clone git@github.com:trfar/hyprland-nvim-configs.git
 cd hyprland-nvim-configs
 scripts/arch.sh          # Arch/CachyOS/...: installs packages (pacman) + symlinks hypr/ into ~/.config/hypr
 scripts/debian.sh        # Debian 13+ (trixie): installs packages (apt) + symlinks hypr/ into ~/.config/hypr
@@ -53,12 +53,18 @@ Symlink each file from `hypr/` into `~/.config/hypr/` (`hyprland.lua`, `monitors
 ### Install (macOS, Apple Silicon):
 
 ```sh
-git clone <this repo>
+git clone git@github.com:trfar/hyprland-nvim-configs.git
 cd hyprland-nvim-configs
 scripts/mac.sh           # brew: neovim + ripgrep/fd/lazygit, symlinks nvim/ into ~/.config/nvim
 ```
 
 Plugins, LSP servers and treesitter parsers install themselves on first nvim run (slow the first time). Requires Homebrew first — the script tells you how if it's missing.
+
+### Windows (work machines, no admin needed):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\win.ps1   # scoop (user-level) + junctions nvim/ into %USERPROFILE%\.config\nvim
+```
 
 ### .env
 

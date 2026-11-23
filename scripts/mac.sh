@@ -8,7 +8,7 @@
 #   NVIM_AI_* env vars for CodeCompanion — copy the block from nvim/.env.example
 #     into your shell config (~/.zshrc / ~/.bashrc / fish config.fish)
 #
-# Requires Neovim >= 0.11 (the config uses vim.pack); brew's `neovim` is 0.11+.
+# Requires Neovim >= 0.12 (the config uses vim.pack); brew's `neovim` is current stable.
 
 set -euo pipefail
 
