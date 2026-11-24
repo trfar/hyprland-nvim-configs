@@ -4,6 +4,7 @@
 tags
 test.sh
 hypr/.env
+hypr/monitors.lua
 .luarc.json
 spell/
 nvim-pack-lock.json

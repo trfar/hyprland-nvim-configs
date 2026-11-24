@@ -55,6 +55,26 @@ do
 	end
 end
 
+-- Per-machine monitor pins from .env (monitors.lua above takes precedence if present):
+--   MONITOR_<n>=<name> <mode> <position>
+-- e.g. MONITOR_1=DP-1 2560x1440@144 auto-right
+-- Find values with: hyprctl monitors -j | jq -r '.[] | "\(.name) \(.current_mode.width)x\(.current_mode.height)@\(.current_mode.refresh_rate)"'
+-- No pins and no monitors.lua = Hyprland auto-detects (the laptop default).
+do
+	local warn = (log and log.warn) or print
+	for i = 1, 10 do
+		local v = env["MONITOR_" .. i]
+		if v and v ~= "" then
+			local name, mode, pos = v:match("^(%S+)%s+(%S+)%s+(%S+)$")
+			if name then
+				hl.monitor({ output = name, mode = mode, position = pos })
+			else
+				warn("hyprland: bad MONITOR_" .. i .. "='" .. v .. "' (want: <name> <mode> <position>)")
+			end
+		end
+	end
+end
+
 ---------------------
 ---- MY PROGRAMS ----
 ---------------------
