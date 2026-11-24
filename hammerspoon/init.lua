@@ -44,8 +44,16 @@ end)
 -- tiler: N managed windows = N equal columns (1 window = full, i.e.
 -- hyprland's fullscreen_on_one_column); floating windows stay put
 local floating = {} -- window ids excluded from tiling
+local SYSTEM_APPS = { -- windows that must never be tiled
+	["Notification Center"] = true, -- macOS/iPhone notification banners
+	["UserNotificationCenter"] = true, -- older name for the same
+}
 
 local function isManaged(w)
+	local a = w.application and w:application()
+	if a and SYSTEM_APPS[a:name()] then
+		return false
+	end
 	return w:isVisible() and not w:isMinimized() and not floating[w:id()]
 		and w:id() ~= 0 -- skip the desktop background window
 end
