@@ -53,8 +53,28 @@ end
 local managedFilter = hs.window.filter.new(function(w)
 	return w ~= nil and isManaged(w)
 end)
+-- managed windows on the CURRENT space of each display (the filter also
+-- sees windows on other spaces; windowSpaces tells us where they really are)
 local function managedWindows()
-	return managedFilter:getWindows()
+	local here = {}
+	for _, sid in pairs(hs.spaces.activeSpaces() or {}) do
+		here[sid] = true
+	end
+	local out = {}
+	for _, w in ipairs(managedFilter:getWindows()) do
+		local ws = hs.spaces.windowSpaces(w:id())
+		local onCur = #ws == 0 -- unknown space membership: keep current behavior
+		for _, sid in ipairs(ws) do
+			if here[sid] then
+				onCur = true
+				break
+			end
+		end
+		if onCur then
+			out[#out + 1] = w
+		end
+	end
+	return out
 end
 
 local function center(w)
