@@ -4,9 +4,17 @@ Configuration for my Neovim & Hyprland installations.
 
 ## Layout:
 
-- `hypr/` — Hyprland config. `hyprland.lua` is the main file; `monitors.lua` is the per-machine monitor setup (optional); `.env` is the per-machine values (gitignored, created from `.env.example`)
+- `hypr/` — Hyprland config. `hyprland.lua` is the main file; `monitors.lua` is the per-machine escape hatch (gitignored, optional); `.env` is the per-machine values (gitignored, created from `.env.example`)
 - `nvim/` — Neovim config
 - `scripts/` — install scripts
+- `docs/` — guides + generated keymap reference
+
+## Docs:
+
+- `docs/Neovim-Basics.md` — this preset in five minutes, then in parts
+- `docs/Neovim-Workflows.md` — plugin by plugin, basic + advanced
+- `docs/Hyprland-Basics.md` — the Hyprland mental map (workspaces, layouts, keymap, `hyprctl`)
+- `docs/keys.md` — full keymap reference, generated from the config (`scripts/keys.sh`)
 
 ## Hyprland:
 
@@ -29,16 +37,13 @@ Then edit `hypr/.env` for your machine and log out / back in.
 | --- | --- |
 | `PRIMARY_MONITOR` | Main monitor name (workspace 1's home, wallpaper target) |
 | `SECONDARY_MONITOR` | Second monitor. **Set to empty for a single-monitor setup** — all workspaces 1-10 then live on the one monitor with the scrolling layout. In dual setups 1-5 go to primary (scrolling), 6-10 to secondary (master layout) |
+| `MONITOR_<n>` | Optional per-monitor pin: `<name> <mode> <position>` (see below) |
 | `WALLPAPER_PRIMARY` / `WALLPAPER_SECONDARY` | swaybg wallpaper paths at startup (empty = skip that monitor) |
 | `TERMINAL`, `MENU`, `BROWSER`, `OBSIDIAN`, `FILEMANAGER` | The apps launched by the keybinds |
 
 Find your monitor names with `hyprctl monitors` (after logging into Hyprland).
 
-**`hypr/monitors.lua`** — per-monitor resolution, position and rotation. Only needed if you want to pin those; if the file doesn't exist Hyprland auto-detects (usually fine for a single built-in display). One `hl.monitor` block per monitor, e.g.:
-
-```lua
-hl.monitor({ output = "eDP-1", mode = "1920x1200@60" })
-```
+**Per-machine monitor pins** — in `hypr/.env`, not in a file: `MONITOR_<n>=<name> <mode> <position>` (e.g. `MONITOR_1=DP-1 2560x1440@144 auto-right`). Without pins Hyprland auto-detects (usually right for a single built-in display); find your values with `hyprctl monitors -j | jq` (one-liner in `.env.example`). `hypr/monitors.lua` remains as an optional escape hatch for anything the .env form can't express (rotation, per-monitor vrr) — it's gitignored and takes precedence over the .env pins if present.
 
 **`hypr/hyprlock.conf`** — the two `background` blocks hardcode my monitor names (`DP-1`/`DP-2`) and wallpaper paths. On a new machine set the `monitor =` lines to your monitor names (and `path` to an existing image), or delete both blocks for a plain lock screen.
 
@@ -55,10 +60,14 @@ Symlink each file from `hypr/` into `~/.config/hypr/` (`hyprland.lua`, `monitors
 ```sh
 git clone git@github.com:trfar/hyprland-nvim-configs.git
 cd hyprland-nvim-configs
-scripts/mac.sh           # brew: neovim + ripgrep/fd/lazygit, symlinks nvim/ into ~/.config/nvim
+scripts/mac.sh           # brew: neovim + ripgrep/fd/lazygit + hammerspoon, symlinks nvim/ and hammerspoon/
 ```
 
 Plugins, LSP servers and treesitter parsers install themselves on first nvim run (slow the first time). Requires Homebrew first — the script tells you how if it's missing.
+
+### Hammerspoon (Mac window management)
+
+`hammerspoon/init.lua` mirrors the SUPER (⌘) keybinds from `hypr/hyprland.lua` (verified on macOS 26.5.2, Hammerspoon 1.1.1): simple column tiler (1 window = full screen, 3px gaps), vim focus/swap (⌘hjkl / ⌘⇧hjkl, horizontal wrap), send window to other monitor (⌘⌥h/l), per-display workspaces (⌃1–0 switch, ⌃⇧1–0 send — macOS "Displays have separate Spaces", numbers index that display's Spaces; ⌃1 may need freeing from system App Exposé: System Settings → Keyboard → Keyboard Shortcuts → Mission Control), scratchpad (⌘⇧`), tiling toggle (⌘⇧V — 1.1.1 has no window-level API, so this excludes the window from the tiler instead of floating it), re-tile all (⌃⌘R), launchers (⌘` terminal, ⌘L browser, ⌘O Obsidian, ⌘⇧E Finder, ⌘⇧M shut down). Needs Accessibility + Input Monitoring permissions. Reload with ⌥⌘F5. Lock / screenshot / fullscreen / media stay native (⌃⌘Q, ⌘⇧4, ⌃⌘F). Gaps vs Hyprland: no window borders, no scrolling past the screen edge, space switches flash Mission Control briefly.
 
 ### Windows (work machines, no admin needed):
 
