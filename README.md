@@ -14,6 +14,7 @@ Configuration for my Neovim & Hyprland installations.
 - `docs/Neovim-Basics.md` — this preset in five minutes, then in parts
 - `docs/Neovim-Workflows.md` — plugin by plugin, basic + advanced
 - `docs/Hyprland-Basics.md` — the Hyprland mental map (workspaces, layouts, keymap, `hyprctl`)
+- `docs/Hammerspoon.md` — the Mac tiling side: model, keymap, setup, gotchas
 - `docs/keys.md` — full keymap reference, generated from the config (`scripts/keys.sh`)
 
 ## Hyprland:
@@ -67,7 +68,7 @@ Plugins, LSP servers and treesitter parsers install themselves on first nvim run
 
 ### Hammerspoon (Mac window management)
 
-`hammerspoon/init.lua` mirrors the SUPER (⌘) keybinds from `hypr/hyprland.lua` (verified on macOS 26.5.2, Hammerspoon 1.1.1): simple column tiler (1 window = full screen, 3px gaps), vim focus/swap (⌘hjkl / ⌘⇧hjkl, horizontal wrap), send window to other monitor (⌘⌥h/l), per-display workspaces (⌃1–0 switch, ⌃⇧1–0 send — macOS "Displays have separate Spaces", numbers index that display's Spaces; ⌃1 may need freeing from system App Exposé: System Settings → Keyboard → Keyboard Shortcuts → Mission Control), scratchpad (⌘⇧`), tiling toggle (⌘⇧V — 1.1.1 has no window-level API, so this excludes the window from the tiler instead of floating it), re-tile all (⌃⌘R), launchers (⌘` terminal, ⌘L browser, ⌘O Obsidian, ⌘⇧E Finder, ⌘⇧M shut down). Needs Accessibility + Input Monitoring permissions. Reload with ⌥⌘F5. Lock / screenshot / fullscreen / media stay native (⌃⌘Q, ⌘⇧4, ⌃⌘F). Gaps vs Hyprland: no window borders, no scrolling past the screen edge, space switches flash Mission Control briefly.
+`hammerspoon/init.lua` mirrors the SUPER (⌘) keybinds from `hypr/hyprland.lua`: column tiling, vim focus/swap (⌘hjkl / ⌘⇧hjkl), send window to other monitor (⌘⌥h/l), per-display workspaces (⌘1–0 switch, ⌘⇧1–0 send), and the launcher keys. It is not a WM — no borders or master layout; "float" excludes a window from the tiler. Full reference, what to expect, and gaps vs Hyprland: `docs/Hammerspoon.md`. Needs Accessibility + Input Monitoring permissions. Reload: menu bar icon → Reload.
 
 ### Windows (work machines, no admin needed):
 

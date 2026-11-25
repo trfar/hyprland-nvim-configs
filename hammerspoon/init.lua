@@ -3,8 +3,6 @@
 -- :visibleFrame, no window :level). Reload: menu bar icon → Reload.
 -- Not a WM: no borders, no master layout, no always-on-top
 -- (float = excluded from the tiler).
-hs.allowAppleScript(true) -- osascript debug channel
-
 -- per-machine
 local apps = {
 	terminal = "Alacritty",
@@ -15,7 +13,6 @@ local apps = {
 local mod = { "cmd" } -- SUPER == Command
 local GAP = 3
 local ANIM = 0.15
-local SCRATCH_APP = apps.terminal
 local MENUBAR = 25 -- top inset; bump for a taller menu bar
 
 hs.window.animationDuration = ANIM
@@ -356,7 +353,6 @@ local function sendToSpace(targetIdx)
 	local sf = (w:screen() or hs.screen.primaryScreen()):fullFrame()
 	local mt = hs.eventtap.event.types
 	tilingPaused = true
-	_G.hs_draglog = { 'start x=' .. math.floor(w:frame().x) }
 	local function hop(remaining)
 		if remaining == 0 then
 			tilingPaused = false
@@ -369,7 +365,6 @@ local function sendToSpace(targetIdx)
 		local n = 6
 		local function step(i)
 			if i > n then
-				_G.hs_draglog[#_G.hs_draglog + 1] = 'hold winx=' .. math.floor(w:frame().x)
 				hs.timer.doAfter(2.0, function() -- edge hold: native switch happens here
 					local p = hs.mouse.absolutePosition()
 					hs.eventtap.event.newMouseEvent(mt["leftMouseUp"], p):post()
@@ -381,12 +376,10 @@ local function sendToSpace(targetIdx)
 			local p = hs.geometry.point(x, pt0.y)
 			hs.mouse.setAbsolutePosition(p)
 			hs.eventtap.event.newMouseEvent(mt["leftMouseDragged"], p):post()
-			_G.hs_draglog[#_G.hs_draglog + 1] = 's' .. i .. ' ptr=' .. math.floor(p.x) .. ' winx=' .. math.floor(w:frame().x)
 			hs.timer.doAfter(0.15, function() step(i + 1) end)
 		end
 		hs.mouse.setAbsolutePosition(pt0)
 		hs.eventtap.event.newMouseEvent(mt["leftMouseDown"], pt0):post()
-		_G.hs_draglog[#_G.hs_draglog + 1] = 'press x=' .. math.floor(pt0.x)
 		hs.timer.doAfter(0.25, function() step(1) end)
 	end
 	hop(math.abs(targetIdx - from))
@@ -406,31 +399,3 @@ for i = 1, 10 do
 		if c then sendToSpace(n) end
 	end)
 end
-
--- scratchpad: quarter-pane terminal, excluded from the tiler, minimize=hide.
--- Unbound (SUPER+Q is the browser); rebind scratchToggle if wanted.
-local function scratchToggle()
-	local a = hs.application.get(SCRATCH_APP)
-	if not a then
-		launch(SCRATCH_APP)
-		return
-	end
-	local w = a:mainWindow()
-	if not w then
-		return
-	end
-	if w:isMinimized() then
-		floating[w:id()] = true
-		w:unminimize()
-		local f = tileRect(hs.screen.primaryScreen())
-		w:move({ x = f.x + f.w * 0.6, y = f.y, w = f.w * 0.4, h = f.h * 0.5 })
-		w:focus()
-		scheduleTile()
-	else
-		w:minimize()
-	end
-end
-
--- debug handles (use the osascript channel above)
-_G.hs_dbg = { tileNow = tileNow, managedWindows = managedWindows, sendToSpace = sendToSpace }
-_G.hs_config_loaded = true
