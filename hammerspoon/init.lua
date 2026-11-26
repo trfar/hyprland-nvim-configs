@@ -44,6 +44,7 @@ local floating = {} -- window ids excluded from tiling
 local SYSTEM_APPS = { -- windows that must never be tiled
 	["Notification Center"] = true, -- macOS/iPhone notification banners
 	["UserNotificationCenter"] = true, -- older name for the same
+	["Spotlight"] = true, -- macOS ⌘Space search bar
 }
 
 local function isManaged(w)
