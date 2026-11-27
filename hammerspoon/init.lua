@@ -52,7 +52,8 @@ local function isManaged(w)
 	if a and SYSTEM_APPS[a:name()] then
 		return false
 	end
-	return w:isVisible() and not w:isMinimized() and not floating[w:id()]
+	return w:isStandard() -- exclude app popovers (Control Center, brightness/volume/battery, WiFi)
+		and w:isVisible() and not w:isMinimized() and not floating[w:id()]
 		and w:id() ~= 0 -- skip the desktop background window
 end
 
