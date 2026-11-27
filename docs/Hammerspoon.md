@@ -22,7 +22,7 @@ For someone new to the macOS window-management setup. `hammerspoon/init.lua` mir
 | `⌘⌥h` / `⌘⌥l` | Move the focused window to the other monitor |
 | `⌘1`–`⌘0` | Switch to the Nth user Space on the display with focus |
 | `⌘⇧1`–`⌘0` | Send the focused window to that Space |
-| `⌘S` | Terminal (Alacritty) — launch or focus |
+| `⌘S` | Terminal (Alacritty) — new window |
 | `⌘W` | Finder |
 | `⌘Q` | Browser (Zen) |
 | `⌘⇧A` | Obsidian |

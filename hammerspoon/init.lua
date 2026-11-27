@@ -10,6 +10,7 @@ local apps = {
 	browser = "Zen",
 	obsidian = "Obsidian",
 }
+local ALACRITTY = "/Applications/Alacritty.app/Contents/MacOS/alacritty"
 local mod = { "cmd" } -- SUPER == Command
 local GAP = 3
 local ANIM = 0.15
@@ -22,7 +23,15 @@ hs.window.animationDuration = ANIM
 local function launch(name)
 	hs.application.launchOrFocus(name)
 end
-hs.hotkey.bind(mod, "S", function() launch(apps.terminal) end)
+local function newTerminal()
+	local cmd = ALACRITTY .. " msg create-window"
+	if hs.application.find(apps.terminal) then
+		pcall(hs.execute, cmd)
+	else
+		launch(apps.terminal)
+	end
+end
+hs.hotkey.bind(mod, "S", newTerminal)
 hs.hotkey.bind(mod, "W", function() launch(apps.fileManager) end)
 hs.hotkey.bind(mod, "Q", function() launch(apps.browser) end)
 hs.hotkey.bind({ "cmd", "shift" }, "A", function() launch(apps.obsidian) end)
